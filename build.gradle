@@ -233,8 +233,6 @@ dependencies {
     implementation ("io.springfox:springfox-oas")
     implementation ("io.springfox:springfox-swagger2")
     implementation "io.springfox:springfox-bean-validators"
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.security:spring-security-test"
@@ -245,6 +243,9 @@ dependencies {
     testRuntimeOnly "com.tngtech.archunit:archunit-junit5-engine:${archunitJunit5Version}"
     developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
     //jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
+
+    implementation platform('software.amazon.awssdk:bom:2.17.71')
+    implementation 'software.amazon.awssdk:s3'
 }
 
 if (project.hasProperty("gae")) {
