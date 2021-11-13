@@ -29,7 +29,8 @@ management:
     web:
       base-path: /management
       exposure:
-        include: ['configprops', 'env', 'gateway', 'health', 'info', 'jhimetrics', 'logfile', 'loggers', 'prometheus', 'threaddump']
+        include:
+          ['configprops', 'env', 'gateway', 'health', 'info', 'jhimetrics', 'logfile', 'loggers', 'prometheus', 'threaddump', 'caches']
   endpoint:
     health:
       show-details: when_authorized

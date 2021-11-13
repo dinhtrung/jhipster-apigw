@@ -186,6 +186,7 @@ dependencies {
         exclude group: "org.springframework", module: "spring-webmvc"
     }
     implementation "javax.annotation:javax.annotation-api"
+    implementation "org.springframework.boot:spring-boot-starter-cache"
     implementation "io.dropwizard.metrics:metrics-core"
     implementation "io.micrometer:micrometer-registry-prometheus"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-hppc"
@@ -196,6 +197,9 @@ dependencies {
     implementation "org.apache.commons:commons-lang3"
     implementation "commons-codec:commons-codec"
     implementation "javax.transaction:javax.transaction-api"
+    implementation "com.github.ben-manes.caffeine:caffeine:${caffeineVersion}"
+    implementation "com.github.ben-manes.caffeine:jcache:${caffeineVersion}"
+    implementation "com.typesafe:config:${typesafeConfigVersion}"
     implementation "org.springframework.boot:spring-boot-loader-tools"
     implementation "org.springframework.boot:spring-boot-starter-mail"
     implementation "org.springframework.boot:spring-boot-starter-logging"
