@@ -1,6 +1,5 @@
 package com.ft.web.rest;
 
-import com.ft.security.SecurityUtils;
 import com.ft.service.UserService;
 import com.ft.service.dto.AdminUserDTO;
 import java.security.Principal;

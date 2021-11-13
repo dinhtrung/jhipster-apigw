@@ -2,18 +2,14 @@ package com.ft.service;
 
 import com.ft.config.Constants;
 import com.ft.service.dto.AdminUserDTO;
-import com.ft.service.dto.UserDTO;
-import java.util.*;
+import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.cache.CacheManager;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 /**
  * Service class for managing users.
