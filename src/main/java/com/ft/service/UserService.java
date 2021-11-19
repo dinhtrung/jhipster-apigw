@@ -40,8 +40,34 @@ public class UserService {
 
     private static AdminUserDTO getUser(Map<String, Object> details) {
         AdminUserDTO user = new AdminUserDTO();
+
+        // handle resource server JWT, where sub-claim is email and uid is ID
+        enrichIdAndLogin(details, user);
+        enrichFirstName(details, user);
+        enrichLastName(details, user);
+        enrichActivated(details, user);
+        enrichEmail(details, user);
+        enrichLangKey(details, user);
+        enrichPicture(details, user);
+
+        return user;
+    }
+
+    private static void enrichPicture(Map<String, Object> details, AdminUserDTO user) {
+        if (details.get("picture") != null) {
+            user.setImageUrl((String) details.get("picture"));
+        }
+    }
+
+    private static void enrichActivated(Map<String, Object> details, AdminUserDTO user) {
         Boolean activated = Boolean.TRUE;
-        // handle resource server JWT, where sub claim is email and uid is ID
+        if (details.get("email_verified") != null) {
+            activated = (Boolean) details.get("email_verified");
+        }
+        user.setActivated(activated);
+    }
+
+    private static void enrichIdAndLogin(Map<String, Object> details, AdminUserDTO user) {
         if (details.get("uid") != null) {
             user.setId((String) details.get("uid"));
             user.setLogin((String) details.get("sub"));
@@ -53,22 +79,9 @@ public class UserService {
         } else if (user.getLogin() == null) {
             user.setLogin(user.getId());
         }
-        if (details.get("given_name") != null) {
-            user.setFirstName((String) details.get("given_name"));
-        } else if (details.get("name") != null) {
-            user.setFirstName((String) details.get("name"));
-        }
-        if (details.get("family_name") != null) {
-            user.setLastName((String) details.get("family_name"));
-        }
-        if (details.get("email_verified") != null) {
-            activated = (Boolean) details.get("email_verified");
-        }
-        if (details.get("email") != null) {
-            user.setEmail(((String) details.get("email")).toLowerCase());
-        } else {
-            user.setEmail((String) details.get("sub"));
-        }
+    }
+
+    private static void enrichLangKey(Map<String, Object> details, AdminUserDTO user) {
         if (details.get("langKey") != null) {
             user.setLangKey((String) details.get("langKey"));
         } else if (details.get("locale") != null) {
@@ -84,10 +97,27 @@ public class UserService {
             // set langKey to default if not specified by IdP
             user.setLangKey(Constants.DEFAULT_LANGUAGE);
         }
-        if (details.get("picture") != null) {
-            user.setImageUrl((String) details.get("picture"));
+    }
+
+    private static void enrichEmail(Map<String, Object> details, AdminUserDTO user) {
+        if (details.get("email") != null) {
+            user.setEmail(((String) details.get("email")).toLowerCase());
+        } else {
+            user.setEmail((String) details.get("sub"));
         }
-        user.setActivated(activated);
-        return user;
+    }
+
+    private static void enrichLastName(Map<String, Object> details, AdminUserDTO user) {
+        if (details.get("family_name") != null) {
+            user.setLastName((String) details.get("family_name"));
+        }
+    }
+
+    private static void enrichFirstName(Map<String, Object> details, AdminUserDTO user) {
+        if (details.get("given_name") != null) {
+            user.setFirstName((String) details.get("given_name"));
+        } else if (details.get("name") != null) {
+            user.setFirstName((String) details.get("name"));
+        }
     }
 }

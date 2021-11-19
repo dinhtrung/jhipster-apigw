@@ -2,10 +2,11 @@ package com.ft.config;
 
 import java.time.Duration;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.TimeZone;
 import javax.annotation.Nonnull;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.i18n.LocaleContext;
@@ -54,7 +55,7 @@ public class LocaleConfiguration {
 
         private static final String COOKIE_PATH = "/";
 
-        protected final Log logger = LogFactory.getLog(getClass());
+        protected final Logger log = LoggerFactory.getLogger(getClass());
 
         @Override
         @Nonnull
@@ -105,8 +106,8 @@ public class LocaleConfiguration {
             Assert.notNull(response, "ServerHttpResponse must not be null");
             ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, cookieValue).path(COOKIE_PATH).build();
             response.addCookie(cookie);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Added cookie with name [" + COOKIE_NAME + "] and value [" + cookieValue + "]");
+            if (log.isDebugEnabled()) {
+                log.debug("Added cookie with name [{}] and value [{}]", COOKIE_NAME, cookieValue);
             }
         }
 
@@ -114,54 +115,52 @@ public class LocaleConfiguration {
             Assert.notNull(response, "ServerHttpResponse must not be null");
             ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, "").path(COOKIE_PATH).maxAge(Duration.ZERO).build();
             response.addCookie(cookie);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Removed cookie with name [" + COOKIE_NAME + "]");
+            if (log.isDebugEnabled()) {
+                log.debug("Removed cookie with name [{}]", COOKIE_NAME);
             }
         }
 
         private void parseLocaleCookieIfNecessary(ServerWebExchange exchange) {
-            if (exchange.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME) == null) {
-                // Retrieve and parse cookie value.
-                HttpCookie cookie = exchange.getRequest().getCookies().getFirst(COOKIE_NAME);
-                Locale locale = null;
-                TimeZone timeZone = null;
-                if (cookie != null) {
-                    String value = cookie.getValue();
+            if (exchange.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME) != null) {
+                return;
+            }
+            // Retrieve and parse cookie value.
+            HttpCookie cookie = exchange.getRequest().getCookies().getFirst(COOKIE_NAME);
+            Locale locale = null;
+            TimeZone timeZone = null;
+            if (cookie != null) {
+                String value = cookie.getValue();
 
-                    // Remove the double quote
-                    value = StringUtils.replace(value, QUOTE, "");
+                // Remove the double quote
+                value = StringUtils.replace(value, QUOTE, "");
 
-                    String localePart = value;
-                    String timeZonePart = null;
-                    int spaceIndex = localePart.indexOf(' ');
-                    if (spaceIndex != -1) {
-                        localePart = value.substring(0, spaceIndex);
-                        timeZonePart = value.substring(spaceIndex + 1);
-                    }
-                    locale = !"-".equals(localePart) ? StringUtils.parseLocaleString(localePart.replace('-', '_')) : null;
-                    if (timeZonePart != null) {
-                        timeZone = StringUtils.parseTimeZoneString(timeZonePart);
-                    }
-                    if (logger.isTraceEnabled()) {
-                        logger.trace(
-                            "Parsed cookie value [" +
-                            cookie.getValue() +
-                            "] into locale '" +
-                            locale +
-                            "'" +
-                            (timeZone != null ? " and time zone '" + timeZone.getID() + "'" : "")
-                        );
-                    }
+                String localePart = value;
+                String timeZonePart = null;
+                int spaceIndex = localePart.indexOf(' ');
+                if (spaceIndex != -1) {
+                    localePart = value.substring(0, spaceIndex);
+                    timeZonePart = value.substring(spaceIndex + 1);
                 }
-                exchange
-                    .getAttributes()
-                    .put(LOCALE_REQUEST_ATTRIBUTE_NAME, locale != null ? locale : exchange.getLocaleContext().getLocale());
-                if (timeZone != null) {
-                    exchange.getAttributes().put(TIME_ZONE_REQUEST_ATTRIBUTE_NAME, timeZone);
-                } else {
-                    exchange.getAttributes().remove(TIME_ZONE_REQUEST_ATTRIBUTE_NAME);
+                locale = !"-".equals(localePart) ? StringUtils.parseLocaleString(localePart.replace('-', '_')) : null;
+                if (timeZonePart != null) {
+                    timeZone = StringUtils.parseTimeZoneString(timeZonePart);
+                }
+                if (log.isTraceEnabled()) {
+                    log.trace(
+                        "Parsed cookie value [{}] into locale '{}' and time zone {}",
+                        cookie.getValue(),
+                        locale,
+                        Optional.ofNullable(timeZone).map(TimeZone::getID).orElse("UNKNOWN")
+                    );
                 }
             }
+            exchange.getAttributes().put(LOCALE_REQUEST_ATTRIBUTE_NAME, locale != null ? locale : exchange.getLocaleContext().getLocale());
+            Optional
+                .ofNullable(timeZone)
+                .ifPresentOrElse(
+                    t -> exchange.getAttributes().put(TIME_ZONE_REQUEST_ATTRIBUTE_NAME, t),
+                    () -> exchange.getAttributes().remove(TIME_ZONE_REQUEST_ATTRIBUTE_NAME)
+                );
         }
     }
 }
